@@ -3,69 +3,80 @@ using UnityEngine.InputSystem;
 
 public class PlayerCombat : MonoBehaviour
 {
+    [Header("State")]
+    public bool isMeleeEquipped = false; // false = ranged, true = melee
+
     [Header("Ranged")]
-    public GameObject projectilePrefab;
-    public Transform firePoint;
-    public float fireRate = 0.2f;
+    public GameObject rangedPrefab;
+    public Transform rangedPoint;
+    public float rangedRate = 0.2f;
+    
+    float nextRangedTime;
 
     [Header("Melee")]
     public Transform meleePoint;
     public float meleeRange = 0.5f;
     public float meleeRate = 0.5f;
     public LayerMask enemyLayer;
-
-    float nextFireTime;
+    
     float nextMeleeTime;
 
-    // shooting input
-    public void OnFire(InputAction.CallbackContext ctx)
+    // one unified attack input
+    public void OnAttack(InputAction.CallbackContext ctx)
     {
-        if (ctx.performed && Time.time >= nextFireTime)
+        if (ctx.performed)
         {
-            Shoot();
-            nextFireTime = Time.time + fireRate;
+            if (isMeleeEquipped && Time.time >= nextMeleeTime)
+            {
+                MeleeAttack();
+                nextMeleeTime = Time.time + meleeRate;
+            }
+            else if (!isMeleeEquipped && Time.time >= nextRangedTime)
+            {
+                RangedAttack();
+                nextRangedTime = Time.time + rangedRate;
+            }
         }
     }
 
-    // melee input
-    public void OnMelee(InputAction.CallbackContext ctx)
+    // toggles between the two states
+    public void OnSwapWeapon(InputAction.CallbackContext ctx)
     {
-        if (ctx.performed && Time.time >= nextMeleeTime)
+        if (ctx.performed)
         {
-            MeleeAttack();
-            nextMeleeTime = Time.time + meleeRate;
+            isMeleeEquipped = !isMeleeEquipped;
+            Debug.Log(isMeleeEquipped ? "swapped to: melee" : "swapped to: ranged");
         }
     }
 
-    void Shoot()
+    void RangedAttack()
     {
-        // spawn the bullet
-        GameObject bullet = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
+        // spawn the projectile
+        GameObject projectile = Instantiate(rangedPrefab, rangedPoint.position, rangedPoint.rotation);
 
-        // check which way the player is facing using localscale
+        // check which way the player is facing
         float facingDirection = Mathf.Sign(transform.localScale.x);
 
-        // pass the direction to the bullet's own script
-        Bullet bulletScript = bullet.GetComponent<Bullet>();
-        if (bulletScript != null)
+        // pass the direction to the projectile's script
+        Bullet projectileScript = projectile.GetComponent<Bullet>();
+        if (projectileScript != null)
         {
-            bulletScript.Setup(facingDirection);
+            projectileScript.Setup(facingDirection);
         }
     }
 
     void MeleeAttack()
     {
-        // draw an invisible circle and grab everything inside it on the enemy layer
+        // grab everything inside the hitbox
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(meleePoint.position, meleeRange, enemyLayer);
 
         foreach (Collider2D enemy in hitEnemies)
         {
             Debug.Log("punched: " + enemy.name);
-            // apply damage here later, e.g., enemy.GetComponent<EnemyHealth>().TakeDamage(10);
         }
     }
 
-    // draws a red circle in the editor so you can see your melee range
+    // draws the melee hitbox in the editor
     void OnDrawGizmosSelected()
     {
         if (meleePoint == null) return;

@@ -2,33 +2,38 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
+    [Header("Settings")]
     public float speed = 20f;
     public float lifetime = 2f;
+    
+    [Header("Collision")]
+    public LayerMask enemyLayer; 
+    public LayerMask environmentLayer; 
     
     Rigidbody2D rb;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        Destroy(gameObject, lifetime); // clean up memory
+        Destroy(gameObject, lifetime); 
     }
 
-    // called by PlayerCombat immediately after spawning
     public void Setup(float direction)
     {
-        // flip bullet sprite if shooting left
-        transform.localScale = new Vector3(direction, 1, 1);
-        
-        // set velocity straight forward
+        float originalX = Mathf.Abs(transform.localScale.x);
+        transform.localScale = new Vector3(originalX * direction, transform.localScale.y, transform.localScale.z);
         rb.linearVelocity = new Vector2(speed * direction, 0);
     }
 
     void OnTriggerEnter2D(Collider2D hitInfo)
     {
-        // put damage logic here later
-        Debug.Log("hit: " + hitInfo.name);
-        
-        // destroy bullet on impact
-        Destroy(gameObject);
+        // check if the object's layer matches either of our masks
+        bool hitEnemy = (enemyLayer.value & (1 << hitInfo.gameObject.layer)) > 0;
+        bool hitEnv = (environmentLayer.value & (1 << hitInfo.gameObject.layer)) > 0;
+
+        if (hitEnemy || hitEnv)
+        {
+            Destroy(gameObject);
+        }
     }
 }

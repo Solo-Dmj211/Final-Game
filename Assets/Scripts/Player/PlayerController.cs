@@ -58,6 +58,7 @@ public class PlayerController : MonoBehaviour
     public void OnMove(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
     {
         moveInput = ctx.ReadValue<Vector2>().x;
+        
     }
 
     public void OnJump(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
