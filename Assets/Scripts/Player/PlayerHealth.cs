@@ -13,8 +13,11 @@ public class PlayerHealth : MonoBehaviour
     public int currentLives;
 
     [Header("Respawn")]
-    public Transform respawnPoint; // optional - if null, respawns at starting position
-    public float invincibilityDuration = 1.5f; // seconds of invincibility after taking a hit
+    public Transform respawnPoint;
+    public float invincibilityDuration = 1.5f;
+
+    [Header("Game Over")]
+    public string mainMenuSceneName = "MainMenu"; // scene to load on game over
 
     [Header("UI")]
     public TextMeshProUGUI hpText;
@@ -34,7 +37,6 @@ public class PlayerHealth : MonoBehaviour
 
     void Update()
     {
-        // tick down invincibility frames
         if (isInvincible)
         {
             invincibilityTimer -= Time.deltaTime;
@@ -58,7 +60,6 @@ public class PlayerHealth : MonoBehaviour
         }
         else
         {
-            // brief invincibility so you don't get vaporized by overlapping enemies
             isInvincible = true;
             invincibilityTimer = invincibilityDuration;
         }
@@ -77,7 +78,6 @@ public class PlayerHealth : MonoBehaviour
             return;
         }
 
-        // respawn with full HP
         Respawn();
     }
 
@@ -88,7 +88,6 @@ public class PlayerHealth : MonoBehaviour
         Vector3 target = respawnPoint != null ? respawnPoint.position : startPosition;
         transform.position = target;
 
-        // give brief invincibility so enemies near respawn don't insta-kill
         isInvincible = true;
         invincibilityTimer = invincibilityDuration;
 
@@ -98,8 +97,8 @@ public class PlayerHealth : MonoBehaviour
 
     void GameOver()
     {
-        Debug.Log("game over! restarting scene...");
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        Debug.Log("game over! returning to main menu...");
+        SceneManager.LoadScene(mainMenuSceneName);
     }
 
     void UpdateUI()
@@ -110,7 +109,7 @@ public class PlayerHealth : MonoBehaviour
             livesText.text = "Lives: " + currentLives;
     }
 
-    // for testing in editor - press K to take 25 damage
+    // SARUN: for testing purposes by sarun - press K to take 25 damage
     void OnGUI()
     {
         if (Application.isEditor && Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.K)
