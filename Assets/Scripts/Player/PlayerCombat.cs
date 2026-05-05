@@ -17,6 +17,7 @@ public class PlayerCombat : MonoBehaviour
     public Transform meleePoint;
     public float meleeRange = 0.5f;
     public float meleeRate = 0.5f;
+    public int meleeDamage = 20; // NEW: how much damage melee deals
     public LayerMask enemyLayer;
     
     float nextMeleeTime;
@@ -73,6 +74,13 @@ public class PlayerCombat : MonoBehaviour
         foreach (Collider2D enemy in hitEnemies)
         {
             Debug.Log("punched: " + enemy.name);
+            
+            // Sarun: actually trying to deal damage
+            EnemyHealth eh = enemy.GetComponent<EnemyHealth>();
+            if (eh != null)
+            {
+                eh.TakeDamage(meleeDamage);
+            }
         }
     }
 
@@ -83,4 +91,5 @@ public class PlayerCombat : MonoBehaviour
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(meleePoint.position, meleeRange);
     }
+
 }

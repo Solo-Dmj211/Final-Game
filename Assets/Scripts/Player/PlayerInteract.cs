@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using TMPro;
+
 public class PlayerInteract : MonoBehaviour
 {
     [Header("Inventory")]
@@ -13,7 +14,7 @@ public class PlayerInteract : MonoBehaviour
 
     void Awake()
     {
-        debugMoney.text = "Money: " + coins.ToString();
+        UpdateMoneyText();
     }
 
     public void OnInteract(InputAction.CallbackContext ctx)
@@ -21,8 +22,21 @@ public class PlayerInteract : MonoBehaviour
         if (ctx.performed && buildingInRange != null)
         {
             buildingInRange.TryUpgrade(ref coins);
-            debugMoney.text = "Money: " + coins.ToString();
+            UpdateMoneyText();
         }
+    }
+
+    // Sarun: called by Resource pickups
+    public void AddCoins(int amount)
+    {
+        coins += amount;
+        UpdateMoneyText();
+    }
+
+    void UpdateMoneyText()
+    {
+        if (debugMoney != null)
+            debugMoney.text = "Money: " + coins.ToString();
     }
 
     void OnTriggerEnter2D(Collider2D other)

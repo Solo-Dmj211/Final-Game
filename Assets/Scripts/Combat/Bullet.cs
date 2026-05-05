@@ -5,6 +5,7 @@ public class Bullet : MonoBehaviour
     [Header("Settings")]
     public float speed = 20f;
     public float lifetime = 2f;
+    public int damage = 10; // NEW: how much damage this bullet deals
     
     [Header("Collision")]
     public LayerMask enemyLayer; 
@@ -31,7 +32,17 @@ public class Bullet : MonoBehaviour
         bool hitEnemy = (enemyLayer.value & (1 << hitInfo.gameObject.layer)) > 0;
         bool hitEnv = (environmentLayer.value & (1 << hitInfo.gameObject.layer)) > 0;
 
-        if (hitEnemy || hitEnv)
+        if (hitEnemy)
+        {
+            // Sarun: i am trying to deal damage to the enemy
+            EnemyHealth eh = hitInfo.GetComponent<EnemyHealth>();
+            if (eh != null)
+            {
+                eh.TakeDamage(damage);
+            }
+            Destroy(gameObject);
+        }
+        else if (hitEnv)
         {
             Destroy(gameObject);
         }
