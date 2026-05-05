@@ -4,9 +4,6 @@ using TMPro;
 
 public class PlayerInteract : MonoBehaviour
 {
-    [Header("Inventory")]
-    public int coins = 10;
-
     [Header("References")]
     public TextMeshProUGUI debugMoney;
     
@@ -21,7 +18,7 @@ public class PlayerInteract : MonoBehaviour
     {
         if (ctx.performed && buildingInRange != null)
         {
-            buildingInRange.TryUpgrade(ref coins);
+            buildingInRange.TryUpgrade(ref GameManager.Instance.money);
             UpdateMoneyText();
         }
     }
@@ -29,14 +26,14 @@ public class PlayerInteract : MonoBehaviour
     // Sarun: called by Resource pickups
     public void AddCoins(int amount)
     {
-        coins += amount;
+        GameManager.Instance.money += amount;
         UpdateMoneyText();
     }
 
     void UpdateMoneyText()
     {
         if (debugMoney != null)
-            debugMoney.text = "Money: " + coins.ToString();
+            debugMoney.text = "Money: " + GameManager.Instance.money.ToString();
     }
 
     void OnTriggerEnter2D(Collider2D other)

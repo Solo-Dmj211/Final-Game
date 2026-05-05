@@ -21,6 +21,9 @@ public abstract class EnemyBase : MonoBehaviour
     protected enum State { Patrol, Chase, Attack }
     protected State state = State.Patrol;
 
+    private float lastDamageTime = -Mathf.Infinity;
+    private const float damageCooldown = 1f;
+
     protected virtual void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -88,10 +91,13 @@ public abstract class EnemyBase : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player"))
         {
+            if (Time.time - lastDamageTime < damageCooldown) return;
+
             PlayerHealth playerHealth = collision.gameObject.GetComponent<PlayerHealth>();
             if (playerHealth != null)
             {
                 playerHealth.TakeDamage(25);
+                lastDamageTime = Time.time;
             }
         }
     }

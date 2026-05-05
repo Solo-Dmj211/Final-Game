@@ -1580,7 +1580,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff1b34a74c27e4797b231ff124fd3373, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MainMenu
-  gameSceneName: NewScene
+  gameSceneName: Home
   mainPanel: {fileID: 249701153}
   controlsPanel: {fileID: 1528665404}
 --- !u!4 &1817229328

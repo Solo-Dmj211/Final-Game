@@ -45,7 +45,7 @@ public class Resource : MonoBehaviour
             if (pi != null)
             {
                 pi.AddCoins(value);
-                Debug.Log("picked up " + value + " resource(s). total coins: " + pi.coins);
+                Debug.Log("picked up " + value + " resource(s). total coins: " + GameManager.Instance.money);
             }
 
             Destroy(gameObject);

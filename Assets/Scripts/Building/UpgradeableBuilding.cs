@@ -1,4 +1,6 @@
+using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [System.Serializable]
 public struct BuildingTier
@@ -11,6 +13,9 @@ public class UpgradeableBuilding : MonoBehaviour
 {
     [Header("Tiers")]
     public BuildingTier[] tiers;
+
+    [Header("Win")]
+    public GameObject winScreenUI;
 
     int currentTier = 0;
 
@@ -34,7 +39,9 @@ public class UpgradeableBuilding : MonoBehaviour
             playerCoins -= cost;
             currentTier++;
             UpdateVisuals();
-            Debug.Log("upgraded! coins left: " + playerCoins);
+
+            if (currentTier >= tiers.Length - 1)
+                StartCoroutine(WinSequence());
         }
         else
         {
@@ -42,14 +49,26 @@ public class UpgradeableBuilding : MonoBehaviour
         }
     }
 
+    IEnumerator WinSequence()
+    {
+        Time.timeScale = 0f;
+
+        if (winScreenUI != null)
+            winScreenUI.SetActive(true);
+
+        yield return new WaitForSecondsRealtime(3f);
+
+        Time.timeScale = 1f;
+        GameManager.Instance.money = 0;
+        SceneManager.LoadScene("MainMenu");
+    }
+
     void UpdateVisuals()
     {
         for (int i = 0; i < tiers.Length; i++)
         {
             if (tiers[i].visualObject != null)
-            {
                 tiers[i].visualObject.SetActive(i == currentTier);
-            }
         }
     }
 }
