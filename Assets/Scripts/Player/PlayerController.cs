@@ -94,7 +94,6 @@ public class PlayerController : MonoBehaviour
     {
         grounded = Physics2D.OverlapCircle(groundCheck.position, groundRadius, environmentLayer);
 
-        // fix: transform.right ignores scale. calculate actual facing direction.
         Vector2 facingDir = new Vector2(Mathf.Sign(transform.localScale.x), 0);
         RaycastHit2D hit = Physics2D.Raycast(wallCheck.position, facingDir, wallDistance, environmentLayer);
         touchingWall = hit;
