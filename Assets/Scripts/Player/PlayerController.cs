@@ -1,3 +1,4 @@
+using Unity.Mathematics;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -143,7 +144,7 @@ public class PlayerController : MonoBehaviour
 
         // flip sprite
         if (moveInput != 0)
-            transform.localScale = new Vector3(Mathf.Sign(moveInput), 1, 1);
+            transform.localScale = new Vector3(Mathf.Sign(moveInput), transform.localScale.y, transform.localScale.z);
     }
 
     // apply jumping
@@ -163,7 +164,7 @@ public class PlayerController : MonoBehaviour
             rb.linearVelocity = new Vector2(-wallDir * wallJumpX, wallJumpY);
             jumpBufferTimer = 0;
             wallJumpTimer = wallJumpDuration; // lock horizontal control
-            transform.localScale = new Vector3(-wallDir, 1, 1); // face away from wall
+            transform.localScale = new Vector3(-wallDir, transform.localScale.y, transform.localScale.z); // face away from wall
         }
     }
 
@@ -180,11 +181,13 @@ public class PlayerController : MonoBehaviour
     void UpdateAnimation()
     {
         if (!anim) return;
-
-        anim.SetFloat("Speed", Mathf.Abs(rb.linearVelocity.x));
-        anim.SetFloat("YVel", rb.linearVelocity.y);
-        anim.SetBool("Grounded", grounded);
-        anim.SetBool("WallSlide", touchingWall && !grounded);
-        anim.SetBool("Sprint", sprintHeld);
+        
+        if (math.abs(rb.linearVelocityX) > 0.5)
+        {
+            anim.SetTrigger("Moving");
+        } else
+        {
+            anim.SetTrigger("Idle");
+        }
     }
 }

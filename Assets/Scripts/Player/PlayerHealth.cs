@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
+using UnityEngine.UI;
 
 public class PlayerHealth : MonoBehaviour
 {
@@ -20,6 +21,7 @@ public class PlayerHealth : MonoBehaviour
     public string mainMenuSceneName = "MainMenu"; // scene to load on game over
 
     [Header("UI")]
+    public Slider hpSlider;
     public TextMeshProUGUI hpText;
     public TextMeshProUGUI livesText;
 
@@ -105,6 +107,8 @@ public class PlayerHealth : MonoBehaviour
     {
         if (hpText != null)
             hpText.text = "HP: " + currentHP;
+        if (hpSlider != null)
+            hpSlider.value = currentHP;
         if (livesText != null)
             livesText.text = "Lives: " + currentLives;
     }
