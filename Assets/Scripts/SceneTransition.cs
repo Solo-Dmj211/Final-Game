@@ -17,6 +17,11 @@ public class SceneTransition : MonoBehaviour
     [Header("Exit Portal Settings")]
     [Tooltip("If enabled, this portal will be locked until enough enemies are defeated.")]
     public bool isExitPortal = false;
+
+    // sarun: for puzzle
+    [Tooltip("If enabled, this portal also requires the map's puzzle to be solved before exit unlocks.")]
+    public bool requirePuzzle = false;
+
     [Tooltip("Drag your TMP text object here. It will show the remaining enemy count.")]
     public TextMeshPro portalText;
     public int mapIndex = 0;
@@ -33,6 +38,9 @@ public class SceneTransition : MonoBehaviour
     private int initialEnemyCount;
     private int requiredKills; // calculated once on Start, rounded to whole number
 
+    // sarun: for puzzle
+    public static bool puzzleSolved = false;
+
     private void Start()
     {
         enemyLayer = LayerMask.GetMask("Enemy");
@@ -41,14 +49,15 @@ public class SceneTransition : MonoBehaviour
         {
             initialEnemyCount = EnemyCount();
             requiredKills     = Mathf.RoundToInt(initialEnemyCount * killThreshold);
-
             Debug.Log($"SceneTransition: {requiredKills}/{initialEnemyCount} enemies must be killed to unlock exit.");
+
+            // sarun: for puzzle
+            if (requirePuzzle) puzzleSolved = false;
         }
 
         if (!isExitPortal && GameManager.Instance != null)
         {
             isDisabled = !GameManager.Instance.IsMapUnlocked(mapIndex);
-
             if (portalText != null)
                 portalText.text = isDisabled ? "Locked" : "Press E to enter";
         }
@@ -78,6 +87,10 @@ public class SceneTransition : MonoBehaviour
     // True when the player has hit the required kill count.
     private bool ThresholdMet() => KillsSoFar() >= requiredKills;
 
+    // sarun: for puzzle
+    // True if this portal either doesn't require a puzzle, or the puzzle is solved
+    private bool PuzzleOk() => !requirePuzzle || puzzleSolved;
+
     private void Update()
     {
         if (!isExitPortal) return;
@@ -88,6 +101,11 @@ public class SceneTransition : MonoBehaviour
         if (!ThresholdMet())
         {
             portalText.text = $"You can't leave yet! Kill {killsNeeded} more enemies to exit. ({killsSoFar}/{requiredKills})";
+        }
+        // sarun: for puzzle
+        else if (!PuzzleOk())
+        {
+            portalText.text = "You can't leave yet! Solve the puzzle to exit.";
         }
         else
         {
@@ -102,6 +120,13 @@ public class SceneTransition : MonoBehaviour
         if (isExitPortal && !ThresholdMet())
         {
             Debug.Log($"Cannot exit — {requiredKills - KillsSoFar()} more enemies must be killed.");
+            return;
+        }
+
+        // sarun: for puzzle
+        if (isExitPortal && !PuzzleOk())
+        {
+            Debug.Log("Cannot exit — the puzzle is not solved yet.");
             return;
         }
 
