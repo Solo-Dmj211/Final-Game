@@ -1,5 +1,6 @@
 using Unity.Mathematics;
 using UnityEngine;
+using System.Collections;
 
 public class PlayerController : MonoBehaviour
 {
@@ -32,6 +33,7 @@ public class PlayerController : MonoBehaviour
     public Transform wallCheck;
     public float wallDistance = 0.5f;
     public LayerMask environmentLayer;
+
 
     Rigidbody2D rb;
     Animator anim;
@@ -72,6 +74,7 @@ public class PlayerController : MonoBehaviour
     {
         sprintHeld = ctx.ReadValueAsButton();
     }
+
 
     // loop
     void Update()
@@ -119,6 +122,7 @@ public class PlayerController : MonoBehaviour
     // apply physics movement
     void ApplyMovement()
     {
+            
         if (wallJumpTimer > 0) 
             return; // ignore input during wall jump
 
@@ -190,4 +194,5 @@ public class PlayerController : MonoBehaviour
             anim.SetTrigger("Idle");
         }
     }
+
 }
