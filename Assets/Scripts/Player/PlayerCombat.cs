@@ -88,6 +88,7 @@ public class PlayerCombat : MonoBehaviour
 
     void MeleeAttack()
     {
+        if (AudioManager.Instance != null) AudioManager.Instance.PlayMelee();   // Play sound effect
         animator?.SetTrigger("Attack");
         HitEnemiesInBox(meleeDamage, meleeKnockback);
     }
@@ -113,6 +114,7 @@ public class PlayerCombat : MonoBehaviour
             Debug.Log("charge released too early — no attack");
             return;
         }
+        if (AudioManager.Instance != null) AudioManager.Instance.PlayMelee();   // Play sound effect
 
         float chargeRatio = Mathf.Clamp01((heldTime - minChargeTime) / (maxChargeTime - minChargeTime));
         int damage = Mathf.RoundToInt(Mathf.Lerp(chargeDamage * 0.5f, chargeDamage, chargeRatio));

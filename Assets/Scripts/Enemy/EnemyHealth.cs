@@ -68,6 +68,8 @@ public class EnemyHealth : MonoBehaviour
     {
         if (isDead) return;
         isDead = true;
+        
+        if (AudioManager.Instance != null) AudioManager.Instance.PlayEnemyDeath(); //for the sound when dead.
         // give player some score
         GameManager.Instance.AddScore(scoreToGive);
 

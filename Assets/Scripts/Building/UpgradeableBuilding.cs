@@ -50,6 +50,7 @@ public class UpgradeableBuilding : MonoBehaviour
                 GameManager.Instance.towerLevel = currentTier;
 
             UpdateVisuals();
+            if (AudioManager.Instance != null) AudioManager.Instance.PlayLevelUp(); // play level up sound effect
 
             if (currentTier >= tiers.Length - 1)
                 StartCoroutine(WinSequence());
@@ -62,6 +63,7 @@ public class UpgradeableBuilding : MonoBehaviour
 
     IEnumerator WinSequence()
     {
+        if (AudioManager.Instance != null) AudioManager.Instance.PlayGameWon(); // play game won sound effect
         Time.timeScale = 0f;
         GameManager.Instance.ApplyTimeBonus();
         

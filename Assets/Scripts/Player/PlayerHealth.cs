@@ -104,6 +104,7 @@ public class PlayerHealth : MonoBehaviour
     {
         currentLives--;
         Debug.Log("lost a life. lives left: " + currentLives);
+        if (AudioManager.Instance != null) AudioManager.Instance.PlayLoseLife();    // play lose life sound effect
         // lose score when losing a life
         GameManager.Instance.RemoveScore(500);
 
@@ -143,6 +144,7 @@ public class PlayerHealth : MonoBehaviour
 
         yield return new WaitForSecondsRealtime(5f);
         Debug.Log("game over! returning to main menu...");
+        if (AudioManager.Instance != null) AudioManager.Instance.PlayGameOver(); // play game over sound effect
         Time.timeScale = 1;
         GameManager.Instance.ResetGame();
         SceneManager.LoadScene(mainMenuSceneName);
