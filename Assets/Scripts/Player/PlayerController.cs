@@ -33,6 +33,9 @@ public class PlayerController : MonoBehaviour
     public float wallDistance = 0.5f;
     public LayerMask environmentLayer;
 
+    [Header("Particles")]
+    public ParticleSystem groundJumpParticles;
+
     [Header("State")]
     public bool isDisabled = false;
 
@@ -170,13 +173,16 @@ public class PlayerController : MonoBehaviour
 
     void HandleJumpLogic()
     {
+        // ground jump
         if (jumpBufferTimer > 0 && coyoteTimer > 0)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
             jumpBufferTimer = 0;
             coyoteTimer = 0;
+            groundJumpParticles?.Play();
         }
 
+        // wall jump
         if (jumpBufferTimer > 0 && touchingWall && !grounded)
         {
             rb.linearVelocity = new Vector2(-wallDir * wallJumpX, wallJumpY);
