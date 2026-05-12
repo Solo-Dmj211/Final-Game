@@ -54,4 +54,13 @@ public class OptionsMenu : MonoBehaviour
         if (muteButtonLabel == null || AudioSettings.Instance == null) return;
         muteButtonLabel.text = AudioSettings.Instance.Muted ? mutedLabel : unmutedLabel;
     }
+
+    public void Quit() 
+    {
+    #if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+    #else
+        Application.Quit();
+    #endif
+    }
 }

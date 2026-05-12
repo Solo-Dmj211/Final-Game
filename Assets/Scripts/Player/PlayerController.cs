@@ -18,7 +18,7 @@ public class PlayerController : MonoBehaviour
     public float wallSlideSpeed = 2f;
     public float wallJumpX = 10f;
     public float wallJumpY = 14f;
-    public float wallJumpDuration = 0.2f; // locks input after wall jump
+    public float wallJumpDuration = 0.2f;
     float wallJumpTimer;
 
     [Header("Stamina")]
@@ -32,6 +32,9 @@ public class PlayerController : MonoBehaviour
     public Transform wallCheck;
     public float wallDistance = 0.5f;
     public LayerMask environmentLayer;
+
+    [Header("State")]
+    public bool isDisabled = false;
 
     Rigidbody2D rb;
     Animator anim;
@@ -55,42 +58,63 @@ public class PlayerController : MonoBehaviour
         stamina = maxStamina;
     }
 
-    // input callbacks
     public void OnMove(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
     {
+        if (isDisabled) return;
         moveInput = ctx.ReadValue<Vector2>().x;
-        
     }
 
     public void OnJump(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
     {
+        if (isDisabled) return;
         if (ctx.performed)
             jumpPressed = true;
     }
 
     public void OnSprint(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
     {
+        if (isDisabled) return;
         sprintHeld = ctx.ReadValueAsButton();
     }
 
-    // loop
+    public void SetMovementEnabled(bool enabled)
+    {
+        isDisabled = !enabled;
+
+        // If disabled, zero out all inputs so the player doesn't drift or
+        // carry a buffered jump into the re-enabled state.
+        if (isDisabled)
+        {
+            moveInput       = 0f;
+            jumpPressed     = false;
+            sprintHeld      = false;
+            jumpBufferTimer = 0f;
+            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
+        }
+    }
+
+
     void Update()
     {
+        if (isDisabled) return;
+
         CheckEnvironment();
         HandleTimers();
         HandleJumpLogic();
         UpdateAnimation();
 
-        jumpPressed = false; // consume input
+        jumpPressed = false;
     }
 
     void FixedUpdate()
     {
+        if (isDisabled) return;
+
         ApplyMovement();
         ApplyWallSlide();
     }
 
-    // environment checks
+
     void CheckEnvironment()
     {
         grounded = Physics2D.OverlapCircle(groundCheck.position, groundRadius, environmentLayer);
@@ -103,7 +127,7 @@ public class PlayerController : MonoBehaviour
             wallDir = (int)Mathf.Sign(transform.localScale.x);
     }
 
-    // manage timers
+
     void HandleTimers()
     {
         if (grounded) coyoteTimer = coyoteTime;
@@ -116,11 +140,9 @@ public class PlayerController : MonoBehaviour
             wallJumpTimer -= Time.deltaTime;
     }
 
-    // apply physics movement
     void ApplyMovement()
     {
-        if (wallJumpTimer > 0) 
-            return; // ignore input during wall jump
+        if (wallJumpTimer > 0) return;
 
         float targetSpeed = moveInput * moveSpeed;
 
@@ -136,58 +158,47 @@ public class PlayerController : MonoBehaviour
 
         stamina = Mathf.Clamp(stamina, 0, maxStamina);
 
-        float speedDiff = targetSpeed - rb.linearVelocity.x;
-        float accelRate = (Mathf.Abs(targetSpeed) > 0.1f) ? accel : decel;
-        float movement = speedDiff * accelRate;
+        float speedDiff  = targetSpeed - rb.linearVelocity.x;
+        float accelRate  = (Mathf.Abs(targetSpeed) > 0.1f) ? accel : decel;
+        float movement   = speedDiff * accelRate;
 
         rb.AddForce(Vector2.right * movement);
 
-        // flip sprite
         if (moveInput != 0)
             transform.localScale = new Vector3(Mathf.Sign(moveInput), transform.localScale.y, transform.localScale.z);
     }
 
-    // apply jumping
     void HandleJumpLogic()
     {
-        // ground jump
         if (jumpBufferTimer > 0 && coyoteTimer > 0)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
             jumpBufferTimer = 0;
-            coyoteTimer = 0; // prevent double jumping instantly
+            coyoteTimer = 0;
         }
 
-        // wall jump
         if (jumpBufferTimer > 0 && touchingWall && !grounded)
         {
             rb.linearVelocity = new Vector2(-wallDir * wallJumpX, wallJumpY);
             jumpBufferTimer = 0;
-            wallJumpTimer = wallJumpDuration; // lock horizontal control
-            transform.localScale = new Vector3(-wallDir, transform.localScale.y, transform.localScale.z); // face away from wall
+            wallJumpTimer = wallJumpDuration;
+            transform.localScale = new Vector3(-wallDir, transform.localScale.y, transform.localScale.z);
         }
     }
 
-    // slide down walls
     void ApplyWallSlide()
     {
         if (touchingWall && !grounded && rb.linearVelocity.y < 0)
-        {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, -wallSlideSpeed);
-        }
     }
 
-    // handle animator
     void UpdateAnimation()
     {
         if (!anim) return;
-        
+
         if (math.abs(rb.linearVelocityX) > 0.5)
-        {
             anim.SetTrigger("Moving");
-        } else
-        {
+        else
             anim.SetTrigger("Idle");
-        }
     }
 }

@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class EnemyHealth : MonoBehaviour
@@ -14,6 +15,9 @@ public class EnemyHealth : MonoBehaviour
     [Header("Effects")]
     public float flashDuration = 0.1f; // visual feedback on hit
     public Color flashColor = Color.red;
+
+    [Header("Score")]
+    public int scoreToGive = 10;
 
     SpriteRenderer sr;
     Color originalColor;
@@ -64,6 +68,8 @@ public class EnemyHealth : MonoBehaviour
     {
         if (isDead) return;
         isDead = true;
+        // give player some score
+        GameManager.Instance.AddScore(scoreToGive);
 
         Debug.Log(gameObject.name + " died");
 

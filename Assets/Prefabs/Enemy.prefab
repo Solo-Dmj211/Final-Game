@@ -207,6 +207,7 @@ MonoBehaviour:
   dropForce: {x: 2, y: 4}
   flashDuration: 0.1
   flashColor: {r: 1, g: 0, b: 0, a: 1}
+  scoreToGive: 100
 --- !u!114 &-3817336964339366033
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -221,6 +222,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyDissolveOnDeath
   dissolveMaterial: {fileID: -876546973899608171, guid: 33896915468a44845a726b17291c6f3e, type: 3}
   duration: 0.6
+  dropAt: 0.85
   overrideShaderValues: 0
   edgeColor: {r: 0, g: 0.8, b: 1, a: 1}
   edgeWidth: 0.08

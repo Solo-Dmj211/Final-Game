@@ -19,7 +19,10 @@ public class Resource : MonoBehaviour
         if (p != null) player = p.transform;
 
         // auto-destroy after lifetime
-        Destroy(gameObject, lifetime);
+        if (lifetime != 0)
+        {
+          Destroy(gameObject, lifetime);  
+        }
     }
 
     void Update()

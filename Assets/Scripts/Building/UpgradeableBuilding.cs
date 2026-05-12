@@ -1,12 +1,14 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 [System.Serializable]
 public struct BuildingTier
 {
     public GameObject visualObject;
     public int costToReach;
+    public int scoreToGive;
 }
 
 public class UpgradeableBuilding : MonoBehaviour
@@ -16,13 +18,14 @@ public class UpgradeableBuilding : MonoBehaviour
 
     [Header("Win")]
     public GameObject winScreenUI;
+    public TextMeshProUGUI winText;
 
     int currentTier = 0;
 
     void Start()
     {
         if (GameManager.Instance != null)
-            currentTier = GameManager.Instance.tower_level;
+            currentTier = GameManager.Instance.towerLevel;
 
         UpdateVisuals();
     }
@@ -41,9 +44,10 @@ public class UpgradeableBuilding : MonoBehaviour
         {
             playerCoins -= cost;
             currentTier++;
+            GameManager.Instance.AddScore(tiers[currentTier].scoreToGive); // add score when upgrading the tower
 
             if (GameManager.Instance != null)
-                GameManager.Instance.tower_level = currentTier;
+                GameManager.Instance.towerLevel = currentTier;
 
             UpdateVisuals();
 
@@ -59,15 +63,18 @@ public class UpgradeableBuilding : MonoBehaviour
     IEnumerator WinSequence()
     {
         Time.timeScale = 0f;
-
+        GameManager.Instance.ApplyTimeBonus();
+        
+        if (winText != null)
+            winText.text = $"You win!\nFinal score: {GameManager.Instance.GetFinalScore()}\nYour score has been submitted.\nThe game will reset soon.";
         if (winScreenUI != null)
             winScreenUI.SetActive(true);
 
-        yield return new WaitForSecondsRealtime(3f);
+        yield return new WaitForSecondsRealtime(8f);
 
         Time.timeScale = 1f;
-        GameManager.Instance.money = 0;
-        GameManager.Instance.tower_level = 0; // reset for next run
+        
+        GameManager.Instance.ResetGame();
         SceneManager.LoadScene("MainMenu");
     }
 

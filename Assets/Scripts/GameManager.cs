@@ -1,4 +1,5 @@
 using HighScore;
+using Unity.Mathematics;
 using UnityEngine;
 
 [System.Serializable]
@@ -14,10 +15,21 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
     public int money = 0;
-    public int tower_level = 0;
+    public int towerLevel = 0;
+    public string playerName = "Player1";
 
     [Header("Maps")]
     public MapData[] maps;
+
+    [Header("Score")]
+    public float gameTimer = 0f;
+    public bool timerRunning = false;
+
+    [Header("Time Bonus")]
+    public int timeBonusMax = 5000;
+    public float timeBonusWindow = 300f;
+
+    int finalScore = 0;
 
     void Start()
     {
@@ -36,9 +48,34 @@ public class GameManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    public void SubmitScore(string playerName, int score)
+    void Update()
     {
-        HS.SubmitHighScore(this, playerName, score);
+        if (timerRunning)
+            gameTimer += Time.deltaTime;
+    }
+
+    public void StartTimer()
+    {
+        gameTimer = 0f;
+        timerRunning = true;
+    }
+
+    public void StopTimer()
+    {
+        timerRunning = false;
+    }
+
+    public void ApplyTimeBonus()
+    {
+        float ratio = Mathf.Clamp01(1f - (gameTimer / timeBonusWindow));
+        int bonus = Mathf.RoundToInt(timeBonusMax * ratio);
+        finalScore += bonus;
+        Debug.Log($"Time bonus: +{bonus} ({gameTimer:F1}s elapsed)");
+    }
+
+    public void SubmitScore()
+    {
+        HS.SubmitHighScore(this, playerName, math.max(0, finalScore));
     }
 
     public void LockMap(int mapIndex)
@@ -77,5 +114,40 @@ public class GameManager : MonoBehaviour
             return false;
         }
         return true;
+    }
+
+    public void AddScore(int amount)
+    {
+        finalScore += amount;
+    }
+
+    public void RemoveScore(int amount)
+    {
+        finalScore -= amount;
+    }
+
+    public int GetFinalScore()
+    {
+        return finalScore;
+    }
+
+    public void ResetGame()
+    {
+        SubmitScore();
+        StopTimer();
+        finalScore      = 0;
+        gameTimer       = 0f;
+        timerRunning    = false;
+        money           = 0;
+        towerLevel      = 0;
+        playerName      = "Player1";
+
+        for (int i = 0; i < maps.Length; i++)
+        {
+            maps[i].completed = false;
+            maps[i].unlocked  = i == 0;
+        }
+
+        Debug.Log("GameManager: Game state reset.");
     }
 }

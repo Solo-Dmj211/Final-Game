@@ -397,6 +397,10 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: a5a1c84a-3a19-4ab9-b643-3d795a8f478d
     m_ActionName: 'Player/Interact[/Keyboard/e]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: af92a9c2-8f30-4a3b-9dfa-d3f340d826c7
+    m_ActionName: 'Player/OpenSettings[/Keyboard/escape]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -435,6 +439,7 @@ MonoBehaviour:
   environmentLayer:
     serializedVersion: 2
     m_Bits: 8
+  isDisabled: 0
 --- !u!114 &3103823062955447486
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -448,6 +453,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCombat
   isMeleeEquipped: 1
+  isDisabled: 0
   attackHitbox: {fileID: 2093502132209878337}
   enemyLayer:
     serializedVersion: 2
@@ -497,6 +503,8 @@ MonoBehaviour:
   hpSlider: {fileID: 0}
   hpText: {fileID: 0}
   livesText: {fileID: 0}
+  playerCombatController: {fileID: 3103823062955447486}
+  playerController: {fileID: 6416925572902579257}
 --- !u!95 &4514586754093318645
 Animator:
   serializedVersion: 7

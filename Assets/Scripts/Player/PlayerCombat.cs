@@ -5,6 +5,7 @@ public class PlayerCombat : MonoBehaviour
 {
     [Header("State")]
     public bool isMeleeEquipped = true;
+    public bool isDisabled = false;
 
     [Header("Hitbox")]
     public BoxCollider2D attackHitbox;
@@ -33,8 +34,21 @@ public class PlayerCombat : MonoBehaviour
     bool isCharging = false;
     float chargeStartTime;
 
+    public void SetCombatEnabled(bool enabled)
+    {
+        isDisabled = !enabled;
+
+        if (isDisabled && isCharging)
+        {
+            isCharging = false;
+            playerController.enabled = true;
+            animator?.SetBool("IsCharging", false);
+        }
+    }
+
     public void OnAttack(InputAction.CallbackContext ctx)
     {
+        if (isDisabled) return;
         if (isMeleeEquipped)
         {
             if (ctx.performed && Time.time >= nextMeleeTime)
@@ -57,6 +71,7 @@ public class PlayerCombat : MonoBehaviour
 
     public void OnSwapWeapon(InputAction.CallbackContext ctx)
     {
+        if (isDisabled) return;
         if (ctx.performed)
         {
             if (isCharging)
