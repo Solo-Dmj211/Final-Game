@@ -94,6 +94,7 @@ public class PlayerHealth : MonoBehaviour
     {
         currentLives--;
         Debug.Log("lost a life. lives left: " + currentLives);
+        if (AudioManager.Instance != null) AudioManager.Instance.PlayLoseLife();    // play lose life sound effect
 
         if (currentLives <= 0)
         {
@@ -122,6 +123,7 @@ public class PlayerHealth : MonoBehaviour
     void GameOver()
     {
         Debug.Log("game over! returning to main menu...");
+        if (AudioManager.Instance != null) AudioManager.Instance.PlayGameOver(); // play game over sound effect
         SceneManager.LoadScene(mainMenuSceneName);
     }
 

@@ -468,6 +468,63 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 118960881}
   m_CullTransparentMesh: 1
+--- !u!1 &148673408
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 148673410}
+  - component: {fileID: 148673409}
+  m_Layer: 0
+  m_Name: AudioManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &148673409
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 148673408}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 109d14938bb61458896d93455846ee36, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AudioManager
+  gameplayMusic: {fileID: 8300000, guid: af8680811821f482cb277fc95cc6c547, type: 3}
+  musicVolume: 0.5
+  enemyDeath: {fileID: 8300000, guid: acd8514eab3da4079afac8b711a9bee5, type: 3}
+  gameOver: {fileID: 8300000, guid: 42efcc31adaae48d582fb101cc91d0dc, type: 3}
+  gameWon: {fileID: 8300000, guid: 538675cb1ab8d43149903be00dab0c71, type: 3}
+  levelUp: {fileID: 8300000, guid: 9e54aa8d05e4f4b10a0c47a6389a9f0a, type: 3}
+  melee: {fileID: 8300000, guid: aa9ee3d87f9c24988af8ada5ea9186c1, type: 3}
+  loseLife: {fileID: 8300000, guid: e3725b2ae0239435c94c55e97faa5b47, type: 3}
+  gameplayScenes:
+  - Map1
+  - Map2
+  - Map3
+  - Home
+--- !u!4 &148673410
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 148673408}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 467.61465, y: 288.61017, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &165551171
 GameObject:
   m_ObjectHideFlags: 0
@@ -3660,3 +3717,4 @@ SceneRoots:
   - {fileID: 1987630498}
   - {fileID: 1817229328}
   - {fileID: 1582624884}
+  - {fileID: 148673410}
