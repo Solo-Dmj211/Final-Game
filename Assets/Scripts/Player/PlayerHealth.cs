@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
 using UnityEngine.UI;
+using System.Collections;
 
 public class PlayerHealth : MonoBehaviour
 {
@@ -24,13 +25,22 @@ public class PlayerHealth : MonoBehaviour
     public Slider hpSlider;
     public TextMeshProUGUI hpText;
     public TextMeshProUGUI livesText;
+    public TextMeshProUGUI loseText;
+    public GameObject loseUI;
 
+    [Header("References")]
+    public PlayerCombat playerCombatController;
+    public PlayerController playerController;
+
+    Animator anim;
     Vector3 startPosition;
     bool isInvincible = false;
     float invincibilityTimer = 0f;
+    bool isDead = false;
 
     void Awake()
     {
+        anim = GetComponent<Animator>();
         currentHP = maxHP;
         currentLives = maxLives;
         startPosition = transform.position;
@@ -51,14 +61,22 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeDamage(int amount)
     {
-        if (isInvincible) return;
+        if (isInvincible || isDead) return;
 
-        currentHP -= amount;
+        currentHP = Mathf.Max(0, currentHP - amount);
+        anim.SetTrigger("Hit");
+        // remove score when getting hit
+        GameManager.Instance.RemoveScore(50);
+
         Debug.Log("player took " + amount + " damage. hp: " + currentHP);
 
         if (currentHP <= 0)
         {
-            LoseLife();
+            isDead = true;
+            playerCombatController.SetCombatEnabled(false);
+            playerController.SetMovementEnabled(false);
+            anim.SetTrigger("Died");
+            StartCoroutine(WaitForDeathAnim());
         }
         else
         {
@@ -69,14 +87,30 @@ public class PlayerHealth : MonoBehaviour
         UpdateUI();
     }
 
+    // dirty way we wait for anim to finish then respawn :P
+    IEnumerator WaitForDeathAnim()
+    {
+        yield return null;
+        while (anim.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f)
+            yield return null;
+
+        yield return new WaitForSeconds(2f);
+
+        LoseLife();
+        anim.Play("Idle", 0, 0f);
+    }
+
     void LoseLife()
     {
         currentLives--;
         Debug.Log("lost a life. lives left: " + currentLives);
+        if (AudioManager.Instance != null) AudioManager.Instance.PlayLoseLife();    // play lose life sound effect
+        // lose score when losing a life
+        GameManager.Instance.RemoveScore(500);
 
         if (currentLives <= 0)
         {
-            GameOver();
+            StartCoroutine(GameOver());
             return;
         }
 
@@ -92,14 +126,27 @@ public class PlayerHealth : MonoBehaviour
 
         isInvincible = true;
         invincibilityTimer = invincibilityDuration;
+        isDead = false;
+        playerCombatController.SetCombatEnabled(true);
+        playerController.SetMovementEnabled(true);
 
         Debug.Log("respawned with full hp");
         UpdateUI();
     }
 
-    void GameOver()
+    IEnumerator GameOver()
     {
+        Time.timeScale = 0;
+        if (loseText != null)
+            loseText.text = $"You lose!\nFinal score: {GameManager.Instance.GetFinalScore()}\nYour score has been submitted.\nThe game will reset soon.";
+        if (loseUI != null)
+            loseUI.SetActive(true);
+
+        yield return new WaitForSecondsRealtime(5f);
         Debug.Log("game over! returning to main menu...");
+        if (AudioManager.Instance != null) AudioManager.Instance.PlayGameOver(); // play game over sound effect
+        Time.timeScale = 1;
+        GameManager.Instance.ResetGame();
         SceneManager.LoadScene(mainMenuSceneName);
     }
 
@@ -119,6 +166,12 @@ public class PlayerHealth : MonoBehaviour
         if (Application.isEditor && Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.K)
         {
             TakeDamage(25);
+        }
+        if (Application.isEditor && Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Z)
+        {
+            print("game over");
+            currentLives = 0;
+            TakeDamage(200);
         }
     }
 }

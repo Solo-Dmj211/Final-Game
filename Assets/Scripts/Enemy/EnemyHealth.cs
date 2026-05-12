@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class EnemyHealth : MonoBehaviour
@@ -15,9 +16,13 @@ public class EnemyHealth : MonoBehaviour
     public float flashDuration = 0.1f; // visual feedback on hit
     public Color flashColor = Color.red;
 
+    [Header("Score")]
+    public int scoreToGive = 10;
+
     SpriteRenderer sr;
     Color originalColor;
     float flashTimer = 0f;
+    bool isDead = false; // prevents multiple Die() calls during the dissolve
 
     void Awake()
     {
@@ -41,6 +46,8 @@ public class EnemyHealth : MonoBehaviour
 
     public void TakeDamage(int amount)
     {
+        if (isDead) return;
+
         currentHP -= amount;
         Debug.Log(gameObject.name + " took " + amount + " damage. hp: " + currentHP);
 
@@ -59,12 +66,33 @@ public class EnemyHealth : MonoBehaviour
 
     void Die()
     {
+        if (isDead) return;
+        isDead = true;
+        
+        if (AudioManager.Instance != null) AudioManager.Instance.PlayEnemyDeath(); //for the sound when dead.
+        // give player some score
+        GameManager.Instance.AddScore(scoreToGive);
+
         Debug.Log(gameObject.name + " died");
-        DropResources();
-        Destroy(gameObject);
+
+        // If a dissolve component is attached, hand off to it.
+        // The dissolve component is responsible for calling DropResources()
+        // at the END of the animation so coins appear with the puff.
+        EnemyDissolveOnDeath dissolve = GetComponent<EnemyDissolveOnDeath>();
+        if (dissolve != null)
+        {
+            dissolve.BeginDissolve();
+        }
+        else
+        {
+            // No dissolve component - drop immediately and destroy.
+            DropResources();
+            Destroy(gameObject);
+        }
     }
 
-    void DropResources()
+    // Made public so EnemyDissolveOnDeath can trigger the drop after the animation.
+    public void DropResources()
     {
         if (resourcePrefab == null) return;
 
