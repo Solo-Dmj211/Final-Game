@@ -9,7 +9,7 @@ public class PlayerInteract : MonoBehaviour
     
     UpgradeableBuilding buildingInRange;
 
-    void Awake()
+    void Start()
     {
         UpdateMoneyText();
     }
@@ -30,11 +30,16 @@ public class PlayerInteract : MonoBehaviour
         UpdateMoneyText();
     }
 
-    void UpdateMoneyText()
+    void UpdateMoneyText() 
     {
+        if (debugMoney == null)
+            debugMoney = GameObject.Find("DebugMoney")?.GetComponent<TextMeshProUGUI>();
+
         if (debugMoney != null)
             debugMoney.text = "Money: " + GameManager.Instance.money.ToString();
-    }
+        else
+            Debug.LogWarning("PlayerInteract: DebugMoney text reference is missing.");
+}
 
     void OnTriggerEnter2D(Collider2D other)
     {
