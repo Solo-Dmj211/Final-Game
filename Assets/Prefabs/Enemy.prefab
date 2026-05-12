@@ -122,7 +122,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!61 &6545740198889849497
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -203,7 +203,7 @@ MonoBehaviour:
   maxHP: 20
   currentHP: 0
   resourcePrefab: {fileID: 8378091285475779556, guid: 43a0acb1784d949a2a1c8d112c93558d, type: 3}
-  resourceDropAmount: 3
+  resourceDropAmount: 1
   dropForce: {x: 2, y: 4}
   flashDuration: 0.1
   flashColor: {r: 1, g: 0, b: 0, a: 1}

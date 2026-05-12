@@ -23,6 +23,14 @@ public abstract class EnemyBase : MonoBehaviour
 
     private float lastDamageTime = -Mathf.Infinity;
     private const float damageCooldown = 1f;
+    private float knockbackEndTime = 0f;
+
+    public void ApplyKnockback(Vector2 force)
+    {
+        rb.linearVelocity = Vector2.zero;
+        rb.AddForce(force, ForceMode2D.Impulse);
+        knockbackEndTime = Time.time + 0.3f;
+    }
 
     protected virtual void Awake()
     {
@@ -31,6 +39,7 @@ public abstract class EnemyBase : MonoBehaviour
 
     protected virtual void Update()
     {
+        if (Time.time < knockbackEndTime) return;
         float distToPlayer = Vector2.Distance(transform.position, player.position);
 
         if (distToPlayer <= attackRange)

@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
 using UnityEngine.UI;
+using System.Collections;
 
 public class PlayerHealth : MonoBehaviour
 {
@@ -25,12 +26,15 @@ public class PlayerHealth : MonoBehaviour
     public TextMeshProUGUI hpText;
     public TextMeshProUGUI livesText;
 
+    Animator anim;
     Vector3 startPosition;
     bool isInvincible = false;
     float invincibilityTimer = 0f;
+    bool isDead = false;
 
     void Awake()
     {
+        anim = GetComponent<Animator>();
         currentHP = maxHP;
         currentLives = maxLives;
         startPosition = transform.position;
@@ -51,14 +55,18 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeDamage(int amount)
     {
-        if (isInvincible) return;
+        if (isInvincible || isDead) return;
 
-        currentHP -= amount;
+        currentHP = Mathf.Max(0, currentHP - amount);
+        anim.SetTrigger("Hit");
+
         Debug.Log("player took " + amount + " damage. hp: " + currentHP);
 
         if (currentHP <= 0)
         {
-            LoseLife();
+            isDead = true;
+            anim.SetTrigger("Died");
+            StartCoroutine(WaitForDeathAnim());
         }
         else
         {
@@ -67,6 +75,19 @@ public class PlayerHealth : MonoBehaviour
         }
 
         UpdateUI();
+    }
+
+    // dirty way we wait for anim to finish then respawn :P
+    IEnumerator WaitForDeathAnim()
+    {
+        yield return null;
+        while (anim.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f)
+            yield return null;
+
+        yield return new WaitForSeconds(2f);
+
+        LoseLife();
+        anim.Play("Idle", 0, 0f);
     }
 
     void LoseLife()
@@ -92,6 +113,7 @@ public class PlayerHealth : MonoBehaviour
 
         isInvincible = true;
         invincibilityTimer = invincibilityDuration;
+        isDead = false;
 
         Debug.Log("respawned with full hp");
         UpdateUI();
