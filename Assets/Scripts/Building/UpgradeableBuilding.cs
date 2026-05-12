@@ -21,6 +21,9 @@ public class UpgradeableBuilding : MonoBehaviour
 
     void Start()
     {
+        if (GameManager.Instance != null)
+            currentTier = GameManager.Instance.tower_level;
+
         UpdateVisuals();
     }
 
@@ -28,7 +31,7 @@ public class UpgradeableBuilding : MonoBehaviour
     {
         if (currentTier >= tiers.Length - 1)
         {
-            Debug.Log("already max level");
+            Debug.Log("Already max level");
             return;
         }
 
@@ -38,6 +41,10 @@ public class UpgradeableBuilding : MonoBehaviour
         {
             playerCoins -= cost;
             currentTier++;
+
+            if (GameManager.Instance != null)
+                GameManager.Instance.tower_level = currentTier;
+
             UpdateVisuals();
 
             if (currentTier >= tiers.Length - 1)
@@ -45,7 +52,7 @@ public class UpgradeableBuilding : MonoBehaviour
         }
         else
         {
-            Debug.Log("not enough coins! you need " + cost);
+            Debug.Log("Not enough coins! You need " + cost);
         }
     }
 
@@ -60,6 +67,7 @@ public class UpgradeableBuilding : MonoBehaviour
 
         Time.timeScale = 1f;
         GameManager.Instance.money = 0;
+        GameManager.Instance.tower_level = 0; // reset for next run
         SceneManager.LoadScene("MainMenu");
     }
 

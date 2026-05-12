@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 public class PlayerCombat : MonoBehaviour
 {
     [Header("State")]
-    public bool isMeleeEquipped = true; // true = melee, false = charge
+    public bool isMeleeEquipped = true;
 
     [Header("Hitbox")]
     public BoxCollider2D attackHitbox;
@@ -13,12 +13,14 @@ public class PlayerCombat : MonoBehaviour
     [Header("Melee")]
     public float meleeRate = 0.5f;
     public int meleeDamage = 20;
+    public float meleeKnockback = 5f;
 
     [Header("Charge Attack")]
-    public float chargeRate = 1.5f;       // cooldown after a charge releases
+    public float chargeRate = 1.5f;
     public int chargeDamage = 50;
-    public float minChargeTime = 0.3f;    // must hold at least this long
-    public float maxChargeTime = 1.5f;    // full charge reached at this point
+    public float minChargeTime = 0.3f;
+    public float maxChargeTime = 1.5f;
+    public float chargeKnockback = 12f;
 
     [Header("Animation")]
     public Animator animator;
@@ -28,7 +30,6 @@ public class PlayerCombat : MonoBehaviour
 
     float nextMeleeTime;
     float nextChargeTime;
-
     bool isCharging = false;
     float chargeStartTime;
 
@@ -44,11 +45,8 @@ public class PlayerCombat : MonoBehaviour
         }
         else
         {
-            // charge begins on press, releases on button up
             if (ctx.performed && !isCharging && Time.time >= nextChargeTime)
-            {
                 BeginCharge();
-            }
             else if (ctx.canceled && isCharging)
             {
                 ReleaseCharge();
@@ -64,7 +62,7 @@ public class PlayerCombat : MonoBehaviour
             if (isCharging)
             {
                 isCharging = false;
-                playerController.enabled = true; // unlock movement if swapping out mid-charge
+                playerController.enabled = true;
                 animator?.SetBool("IsCharging", false);
             }
 
@@ -76,7 +74,7 @@ public class PlayerCombat : MonoBehaviour
     void MeleeAttack()
     {
         animator?.SetTrigger("Attack");
-        HitEnemiesInBox(meleeDamage);
+        HitEnemiesInBox(meleeDamage, meleeKnockback);
     }
 
     void BeginCharge()
@@ -104,12 +102,15 @@ public class PlayerCombat : MonoBehaviour
         float chargeRatio = Mathf.Clamp01((heldTime - minChargeTime) / (maxChargeTime - minChargeTime));
         int damage = Mathf.RoundToInt(Mathf.Lerp(chargeDamage * 0.5f, chargeDamage, chargeRatio));
 
+        // Knockback also scales with charge ratio
+        float knockback = Mathf.Lerp(chargeKnockback * 0.5f, chargeKnockback, chargeRatio);
+
         animator?.SetTrigger("ChargeReleased");
-        HitEnemiesInBox(damage);
+        HitEnemiesInBox(damage, knockback);
         Debug.Log($"charge released after {heldTime:F2}s for {damage} damage");
     }
 
-    void HitEnemiesInBox(int damage)
+    void HitEnemiesInBox(int damage, float knockbackForce)
     {
         if (attackHitbox == null) return;
 
@@ -120,9 +121,18 @@ public class PlayerCombat : MonoBehaviour
 
         foreach (Collider2D enemy in hits)
         {
+            // Damage
             EnemyHealth eh = enemy.GetComponent<EnemyHealth>();
             if (eh != null)
                 eh.TakeDamage(damage);
+
+            // knockbak
+            EnemyBase eb = enemy.GetComponent<EnemyBase>();
+            if (eb != null)
+            {
+                Vector2 direction = ((Vector2)enemy.transform.position - (Vector2)transform.position).normalized;
+                eb.ApplyKnockback(direction * knockbackForce);
+            }
         }
     }
 
