@@ -15,20 +15,35 @@ public class SceneTransition : MonoBehaviour
     public InputActionReference interactAction;
 
     [Header("Exit Portal Settings")]
-    [Tooltip("If enabled, this portal will be locked until all enemies in the scene are defeated.")]
+    [Tooltip("If enabled, this portal will be locked until enough enemies are defeated.")]
     public bool isExitPortal = false;
     [Tooltip("Drag your TMP text object here. It will show the remaining enemy count.")]
     public TextMeshPro portalText;
     public int mapIndex = 0;
 
+    [Header("Kill Threshold")]
+    [Tooltip("Percentage of enemies that must be killed before the exit unlocks. 1 = all, 0.5 = half, etc.")]
+    [Range(0f, 1f)]
+    public float killThreshold = 1f;
+
     public bool isDisabled = false;
 
     private bool isPlayerInRange = false;
     private int enemyLayer;
+    private int initialEnemyCount;
+    private int requiredKills; // calculated once on Start, rounded to whole number
 
     private void Start()
     {
         enemyLayer = LayerMask.GetMask("Enemy");
+
+        if (isExitPortal)
+        {
+            initialEnemyCount = EnemyCount();
+            requiredKills     = Mathf.RoundToInt(initialEnemyCount * killThreshold);
+
+            Debug.Log($"SceneTransition: {requiredKills}/{initialEnemyCount} enemies must be killed to unlock exit.");
+        }
 
         if (!isExitPortal && GameManager.Instance != null)
         {
@@ -57,18 +72,22 @@ public class SceneTransition : MonoBehaviour
             .Count(go => go.activeInHierarchy && ((1 << go.layer) & enemyLayer) != 0);
     }
 
+    // How many enemies have been killed so far.
+    private int KillsSoFar() => initialEnemyCount - EnemyCount();
+
+    // True when the player has hit the required kill count.
+    private bool ThresholdMet() => KillsSoFar() >= requiredKills;
+
     private void Update()
     {
-        if (!isExitPortal) 
-        {
-            return;
-        }
+        if (!isExitPortal) return;
 
-        int remaining = EnemyCount();
+        int killsSoFar  = KillsSoFar();
+        int killsNeeded = requiredKills - killsSoFar;
 
-        if (remaining > 0)
+        if (!ThresholdMet())
         {
-            portalText.text = $"You can't leave yet! There are {remaining} enemies remaining before you can exit.";
+            portalText.text = $"You can't leave yet! Kill {killsNeeded} more enemies to exit. ({killsSoFar}/{requiredKills})";
         }
         else
         {
@@ -80,9 +99,9 @@ public class SceneTransition : MonoBehaviour
     {
         if (!isPlayerInRange || isDisabled) return;
 
-        if (isExitPortal && EnemyCount() > 0)
+        if (isExitPortal && !ThresholdMet())
         {
-            Debug.Log("Cannot exit — enemies still remain!");
+            Debug.Log($"Cannot exit — {requiredKills - KillsSoFar()} more enemies must be killed.");
             return;
         }
 
@@ -101,8 +120,6 @@ public class SceneTransition : MonoBehaviour
     private void OnTriggerExit2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
-        {
             isPlayerInRange = false;
-        }
     }
 }
