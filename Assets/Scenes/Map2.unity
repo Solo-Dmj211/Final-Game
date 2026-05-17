@@ -52813,7 +52813,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4753107777960963301, guid: 28f75926a7a49224291198b0a4251d4c, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -3.19
+      value: -2.97
       objectReference: {fileID: 0}
     - target: {fileID: 4753107777960963301, guid: 28f75926a7a49224291198b0a4251d4c, type: 3}
       propertyPath: m_LocalPosition.z
@@ -52848,6 +52848,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5731479631254244713, guid: 28f75926a7a49224291198b0a4251d4c, type: 3}
+      propertyPath: m_text
+      value: Press E to Return
+      objectReference: {fileID: 0}
+    - target: {fileID: 5731479631254244713, guid: 28f75926a7a49224291198b0a4251d4c, type: 3}
       propertyPath: m_fontSize
       value: 6
       objectReference: {fileID: 0}
@@ -52865,11 +52869,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8251704004860157685, guid: 28f75926a7a49224291198b0a4251d4c, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -3.55
+      value: -2.02
       objectReference: {fileID: 0}
     - target: {fileID: 8251704004860157685, guid: 28f75926a7a49224291198b0a4251d4c, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 2.59
+      value: 1.89
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
