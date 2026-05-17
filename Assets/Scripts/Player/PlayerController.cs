@@ -1,5 +1,6 @@
 using Unity.Mathematics;
 using UnityEngine;
+using System.Collections;
 
 public class PlayerController : MonoBehaviour
 {
@@ -207,4 +208,5 @@ public class PlayerController : MonoBehaviour
         else
             anim.SetTrigger("Idle");
     }
+
 }
