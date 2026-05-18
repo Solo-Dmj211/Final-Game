@@ -55143,6 +55143,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1870956875}
     - target: {fileID: 88961334917905498, guid: 28f75926a7a49224291198b0a4251d4c, type: 3}
+      propertyPath: sceneToLoad
+      value: Home
+      objectReference: {fileID: 0}
+    - target: {fileID: 88961334917905498, guid: 28f75926a7a49224291198b0a4251d4c, type: 3}
       propertyPath: isExitPortal
       value: 1
       objectReference: {fileID: 0}
