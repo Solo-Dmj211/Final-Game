@@ -54,6 +54,9 @@ MonoBehaviour:
   portalText: {fileID: 5731479631254244713}
   mapIndex: 0
   killThreshold: 1
+  killThresholdEnabled: 1
+  resourceThreshold: 1
+  resourceThresholdEnabled: 1
   isDisabled: 0
 --- !u!61 &3056595961238848093
 BoxCollider2D:
@@ -295,8 +298,8 @@ MeshRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 299154195
-  m_SortingLayer: 1
+  m_SortingLayerID: 203932939
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}

@@ -11,97 +11,193 @@ public class SceneTransition : MonoBehaviour
     public string sceneToLoad;
 
     [Header("Input Settings")]
-    [Tooltip("Select your PlayerInteract action from the dropdown or drag it here.")]
     public InputActionReference interactAction;
 
     [Header("Exit Portal Settings")]
-    [Tooltip("If enabled, this portal will be locked until enough enemies are defeated.")]
     public bool isExitPortal = false;
-    [Tooltip("Drag your TMP text object here. It will show the remaining enemy count.")]
     public TextMeshPro portalText;
     public int mapIndex = 0;
 
+    // -------------------------------------------------------------------------
+    // Kill threshold
+    // -------------------------------------------------------------------------
     [Header("Kill Threshold")]
-    [Tooltip("Percentage of enemies that must be killed before the exit unlocks. 1 = all, 0.5 = half, etc.")]
+    public bool killThresholdEnabled = true;
     [Range(0f, 1f)]
+    [Tooltip("Percentage of enemies that must be killed. 1 = all, 0.5 = half.")]
     public float killThreshold = 1f;
 
+    // -------------------------------------------------------------------------
+    // Resource threshold
+    // -------------------------------------------------------------------------
+    [Header("Resource Threshold")]
+    public bool resourceThresholdEnabled = false;
+
+    public enum ResourceMode
+    {
+        FixedAmount,   // player must collect at least X resources total
+        Percentage     // player must collect X% of a designer-specified total
+    }
+    public ResourceMode resourceMode = ResourceMode.FixedAmount;
+
+    [Tooltip("FixedAmount mode: exact number of resources the player must collect.")]
+    public int requiredResourceCount = 5;
+
+    [Tooltip("Percentage mode: the total number of resources you expect to exist " +
+             "(including ones dropped by enemies). Set this in the Inspector.")]
+    public int expectedTotalResources = 10;
+
+    [Range(0f, 1f)]
+    [Tooltip("Percentage mode: fraction of expectedTotalResources that must be collected.")]
+    public float resourcePercentage = 1f;
+
+    // -------------------------------------------------------------------------
+    // Private state
+    // -------------------------------------------------------------------------
     public bool isDisabled = false;
 
-    private bool isPlayerInRange = false;
-    private int enemyLayer;
-    private int initialEnemyCount;
-    private int requiredKills; // calculated once on Start, rounded to whole number
+    bool isPlayerInRange = false;
 
-    private void Start()
+    int enemyLayer;
+    int initialEnemyCount;
+    int requiredKills;
+    int requiredResources; // resolved in Start based on mode
+
+    // Tracks resources collected this session.
+    // Call SceneTransition.NotifyResourceCollected() from your pickup script.
+    static int resourcesCollectedThisScene = 0;
+
+    // =========================================================================
+    // Unity lifecycle
+    // =========================================================================
+
+    void Start()
     {
         enemyLayer = LayerMask.GetMask("Enemy");
+        resourcesCollectedThisScene = 0;
 
         if (isExitPortal)
         {
-            initialEnemyCount = EnemyCount();
-            requiredKills     = Mathf.RoundToInt(initialEnemyCount * killThreshold);
+            // Kill threshold setup
+            if (killThresholdEnabled)
+            {
+                initialEnemyCount = EnemyCount();
+                requiredKills     = Mathf.RoundToInt(initialEnemyCount * killThreshold);
+                Debug.Log($"SceneTransition: {requiredKills}/{initialEnemyCount} enemies required.");
+            }
 
-            Debug.Log($"SceneTransition: {requiredKills}/{initialEnemyCount} enemies must be killed to unlock exit.");
+            // Resource threshold setup
+            if (resourceThresholdEnabled)
+            {
+                if (resourceMode == ResourceMode.FixedAmount)
+                {
+                    requiredResources = requiredResourceCount;
+                }
+                else
+                {
+                    requiredResources = Mathf.RoundToInt(expectedTotalResources * resourcePercentage);
+                }
+
+                Debug.Log($"SceneTransition: {requiredResources} resources must be collected.");
+            }
         }
 
         if (!isExitPortal && GameManager.Instance != null)
         {
             isDisabled = !GameManager.Instance.IsMapUnlocked(mapIndex);
-
             if (portalText != null)
                 portalText.text = isDisabled ? "Locked" : "Press E to enter";
         }
     }
 
-    private void OnEnable()
+    void OnEnable()
     {
         interactAction.action.Enable();
         interactAction.action.performed += InteractPressed;
     }
 
-    private void OnDisable()
+    void OnDisable()
     {
         interactAction.action.Disable();
         interactAction.action.performed -= InteractPressed;
     }
 
-    private int EnemyCount()
+    // =========================================================================
+    // Public API — call this from your resource pickup script when collected
+    // =========================================================================
+
+    public static void NotifyResourceCollected()
+    {
+        resourcesCollectedThisScene++;
+    }
+
+    // =========================================================================
+    // Counting helpers
+    // =========================================================================
+
+    int EnemyCount()
     {
         return FindObjectsByType<GameObject>(FindObjectsSortMode.None)
             .Count(go => go.activeInHierarchy && ((1 << go.layer) & enemyLayer) != 0);
     }
 
-    // How many enemies have been killed so far.
-    private int KillsSoFar() => initialEnemyCount - EnemyCount();
+    int KillsSoFar() => initialEnemyCount - EnemyCount();
 
-    // True when the player has hit the required kill count.
-    private bool ThresholdMet() => KillsSoFar() >= requiredKills;
+    bool KillThresholdMet()
+    {
+        if (!killThresholdEnabled) return true;
+        return KillsSoFar() >= requiredKills;
+    }
 
-    private void Update()
+    bool ResourceThresholdMet()
+    {
+        if (!resourceThresholdEnabled) return true;
+        return resourcesCollectedThisScene >= requiredResources;
+    }
+
+    bool AllThresholdsMet() => KillThresholdMet() && ResourceThresholdMet();
+
+    // =========================================================================
+    // Update — portal text, enemies first then resources
+    // =========================================================================
+
+    void Update()
     {
         if (!isExitPortal) return;
 
-        int killsSoFar  = KillsSoFar();
-        int killsNeeded = requiredKills - killsSoFar;
+        string text = "";
 
-        if (!ThresholdMet())
+        // Enemy line — always shown first
+        if (killThresholdEnabled && !KillThresholdMet())
         {
-            portalText.text = $"You can't leave yet! Kill {killsNeeded} more enemies to exit. ({killsSoFar}/{requiredKills})";
+            int kills  = KillsSoFar();
+            int needed = requiredKills - kills;
+            text += $"Kill {needed} more {(needed == 1 ? "enemy" : "enemies")} to exit. ({kills}/{requiredKills})\n";
         }
-        else
+
+        // Resource line — only shown after kill requirement is met so the
+        // player focuses on enemies first, then resources
+        if (resourceThresholdEnabled && KillThresholdMet() && !ResourceThresholdMet())
         {
-            portalText.text = "Press E to leave.";
+            int collected = resourcesCollectedThisScene;
+            int needed    = requiredResources - collected;
+            text += $"Collect {needed} more {(needed == 1 ? "resource" : "resources")} to exit. ({collected}/{requiredResources})\n";
         }
+
+        portalText.text = text.Length > 0 ? text.TrimEnd('\n') : "Press E to leave.";
     }
 
-    private void InteractPressed(InputAction.CallbackContext context)
+    // =========================================================================
+    // Interaction
+    // =========================================================================
+
+    void InteractPressed(InputAction.CallbackContext context)
     {
         if (!isPlayerInRange || isDisabled) return;
 
-        if (isExitPortal && !ThresholdMet())
+        if (isExitPortal && !AllThresholdsMet())
         {
-            Debug.Log($"Cannot exit — {requiredKills - KillsSoFar()} more enemies must be killed.");
+            Debug.Log("Cannot exit — conditions not met.");
             return;
         }
 
@@ -111,13 +207,13 @@ public class SceneTransition : MonoBehaviour
         SceneManager.LoadScene(sceneToLoad);
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
+    void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
             isPlayerInRange = true;
     }
 
-    private void OnTriggerExit2D(Collider2D other)
+    void OnTriggerExit2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
             isPlayerInRange = false;

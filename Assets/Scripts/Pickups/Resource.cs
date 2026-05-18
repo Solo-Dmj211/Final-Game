@@ -47,7 +47,9 @@ public class Resource : MonoBehaviour
             PlayerInteract pi = other.GetComponent<PlayerInteract>();
             if (pi != null)
             {
+                SceneTransition.NotifyResourceCollected();
                 pi.AddCoins(value);
+                GameManager.Instance.AddScore(300);
                 Debug.Log("picked up " + value + " resource(s). total coins: " + GameManager.Instance.money);
             }
 
