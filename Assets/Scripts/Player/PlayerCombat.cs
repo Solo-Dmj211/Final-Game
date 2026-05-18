@@ -138,18 +138,12 @@ public class PlayerCombat : MonoBehaviour
 
         foreach (Collider2D enemy in hits)
         {
-            // Damage
-            EnemyHealth eh = enemy.GetComponent<EnemyHealth>();
-            if (eh != null)
-                eh.TakeDamage(damage);
-
-            // knockbak
-            EnemyBase eb = enemy.GetComponent<EnemyBase>();
-            if (eb != null)
-            {
+            // Damage and knockback
+            Enemy en = enemy.GetComponent<Enemy>();
+            if (en != null)
+                en.TakeDamage(damage);
                 Vector2 direction = ((Vector2)enemy.transform.position - (Vector2)transform.position).normalized;
-                eb.ApplyKnockback(direction * knockbackForce);
-            }
+                en.ApplyKnockback(direction * knockbackForce);
         }
     }
 
