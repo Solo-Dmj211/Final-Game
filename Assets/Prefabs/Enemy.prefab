@@ -167,8 +167,8 @@ MonoBehaviour:
   wakeUpDuration: 1
   maxHP: 20
   currentHP: 0
-  flashDuration: 0
-  flashColor: {r: 1, g: 0, b: 0, a: 1}
+  flashDuration: 0.01
+  flashColor: {r: 1, g: 1, b: 1, a: 1}
   resourcePrefab: {fileID: 8378091285475779556, guid: 43a0acb1784d949a2a1c8d112c93558d, type: 3}
   resourceDropAmount: 1
   dropForce: {x: 2, y: 4}

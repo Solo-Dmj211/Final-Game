@@ -27,7 +27,7 @@ public class Enemy : MonoBehaviour
 
     [Header("Effects")]
     public float flashDuration = 0.1f;
-    public Color flashColor = Color.red;
+    public Color flashColor = Color.white;
 
     [Header("Drops")]
     public GameObject resourcePrefab;
