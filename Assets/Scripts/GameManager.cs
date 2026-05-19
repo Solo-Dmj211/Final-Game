@@ -33,7 +33,7 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        HS.Init(this, "System Failure");
+        HS.Init(this, "Systems Failure");
     }
 
     void Awake()
